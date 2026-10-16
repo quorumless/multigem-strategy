@@ -15,7 +15,7 @@ const entry = ([label, meaning, good, typical]: E): GlossaryEntry => ({ label, m
 
 const metricEntries: Record<keyof Metrics, E> = {
   months: ['Months tested', 'How many months of history the test covers.', 'Longer is more trustworthy.', '300–430'],
-  totalReturn: ['Total return', 'How much your money grew over the whole period, in percent.', 'Higher is better.', '+500% to +3000% over 35 years'],
+  totalReturn: ['Total return', 'How much your money grew over the whole period, in percent.', 'Higher is better.', 'Depends heavily on the period: compare it with the S&P 500 over the same dates'],
   cagr: ['Yearly growth (CAGR)', 'The steady yearly growth rate that would give the same final result.', 'Higher is better.', '5–10% a year'],
   volatility: ['Volatility', 'How much monthly returns bounce around, scaled to a year.', 'Lower means a smoother ride.', '8–18% a year'],
   sharpe: ['Sharpe ratio', 'Return above T-bills per unit of ups and downs.', 'Higher is better.', '0.3–1.0'],
