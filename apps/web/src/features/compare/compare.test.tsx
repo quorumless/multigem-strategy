@@ -18,7 +18,10 @@ describe('compare best-value highlighting', () => {
 
   it('marks one best cell per row in the rendered table', async () => {
     const results = toEntries(presets.slice(0, 2).map((p) => backtest(p.config, data)), true)
-    const { container } = await render(<MetricsTable results={results} />)
+    const { container, getByRole } = await render(<MetricsTable results={results} />)
+    // Ratios like Sharpe sit behind "Show advanced rows" (PRD U1); open them so every row is checked.
+    expect(container.querySelectorAll('tbody tr').length).toBe(5)
+    await getByRole('button', { name: /Show advanced rows/ }).click()
     const rows = container.querySelectorAll('tbody tr')
     expect(rows.length).toBeGreaterThan(5)
     for (const r of rows) expect(r.querySelectorAll('[data-best="true"]').length).toBeLessThanOrEqual(2)

@@ -46,7 +46,7 @@ export function Lab() {
       title='Backtest'
       lede={
         <>
-          See how a GEM-style strategy would have done on 35+ years of real data.{' '}
+          See how a GEM-style strategy would have done over decades of real market data.{' '}
           <Link to='/how-it-works' className='font-medium whitespace-nowrap text-primary underline underline-offset-4'>
             New to this? How GEM works
           </Link>

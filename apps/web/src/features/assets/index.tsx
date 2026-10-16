@@ -2,11 +2,11 @@ import { lazy, Suspense, useMemo, useState } from 'react'
 import { correlationMatrix, rollingCorrelation } from 'engine'
 import { assets as rawAssets, data, type AssetInfo as BaseInfo } from '@/data/source'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Switch } from '@/components/ui/switch'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
-import { ThemeSwitch } from '@/components/theme-switch'
+import { Badge } from '@/components/ui/badge'
+import { PageShell } from '@/components/page-shell'
+import { ScaleToggle } from '@/lib/chart-parts'
+import { selectClass } from '@/features/lab/info-tip'
+import { TriangleAlert } from 'lucide-react'
 import { diverging } from '@/lib/chart-colors'
 import { num } from '@/lib/format'
 
@@ -61,55 +61,73 @@ export function CorrelationGrid({ ids, from }: { ids: string[]; from?: string })
         <table className='border-collapse' aria-label='Correlation matrix'>
           <thead>
             <tr>
-              <th />
-              {ids.map((id) => <th key={id} scope='col' className='px-0 pb-1 text-[8px] font-medium sm:px-1 sm:text-xs'>{id}</th>)}
+              <th className='sticky start-0 bg-card' />
+              {ids.map((id) => <th key={id} scope='col' className='px-1 pb-1 text-[11px] font-medium text-muted-foreground sm:text-xs'>{id}</th>)}
             </tr>
           </thead>
           <tbody>
             {ids.map((id, i) => (
               <tr key={id}>
-                <th scope='row' className='pe-1 text-start text-[9px] font-medium sm:text-xs'>{id}</th>
+                <th scope='row' className='sticky start-0 bg-card pe-2 text-start text-[11px] font-medium text-muted-foreground sm:text-xs'>{id}</th>
                 {matrix[i]!.map((v, j) => (
-                  <td key={ids[j]} data-testid='corr-cell' className='size-6 text-center text-[9px] tabular-nums sm:size-11 sm:text-xs' style={{ background: cellColor(v) }}>{num(v)}</td>
+                  <td key={ids[j]} data-testid='corr-cell' className='h-9 min-w-10 border border-card text-center text-[11px] tabular-nums sm:h-11 sm:min-w-12 sm:text-xs' style={{ background: cellColor(v) }}>{num(v)}</td>
                 ))}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p className='mt-2 text-xs text-muted-foreground'>Based on {months} months where all of these have data.</p>
+      <div className='mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground'>
+        <span className='flex items-center gap-2' aria-hidden>
+          <span>−1 opposite</span>
+          <span className='h-2 w-28 rounded-full' style={{ background: `linear-gradient(90deg, ${cellColor(-1)}, ${cellColor(0)}, ${cellColor(1)})` }} />
+          <span>+1 together</span>
+        </span>
+        <span>Based on {months} months where all of these have data.</span>
+      </div>
     </>
   )
 }
 
 function AssetCard({ a, selected, onSelect }: { a: AssetInfo; selected: boolean; onSelect: () => void }) {
+  const ex = a.ucits[0]
   return (
-    <button type='button' onClick={onSelect} aria-pressed={selected} className={`flex min-w-0 flex-col justify-start break-words rounded-xl border p-4 text-start text-sm transition-colors hover:bg-accent ${selected ? 'border-primary bg-accent' : ''}`}>
-      <div className='flex flex-wrap items-baseline justify-between gap-x-2'>
-        <span className='font-semibold'>{a.name}</span>
-        <span className='text-xs text-muted-foreground'>{a.id} · {roleLabel(a.role)}</span>
+    <div className={`relative flex min-w-0 flex-col rounded-xl border bg-card p-4 text-sm break-words transition-colors hover:border-primary/60 ${selected ? 'border-primary ring-1 ring-primary' : ''}`}>
+      <div className='flex items-start justify-between gap-2'>
+        {/* Stretched button: the whole card selects the asset for the chart below. */}
+        <button type='button' onClick={onSelect} aria-pressed={selected} className='text-start font-semibold after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-[3px] focus-visible:after:ring-ring/50'>
+          {a.name}
+        </button>
+        <Badge variant='secondary' className='shrink-0'>{roleLabel(a.role)}</Badge>
       </div>
-      <p className='mt-1'>{WHAT[a.id]}</p>
-      <dl className='mt-2 space-y-0.5 text-xs text-muted-foreground'>
-        <div>Investable example: {a.ucits[0]?.name ?? '–'}</div>
-        {a.ucits[0]?.note && <div className='text-amber-700 dark:text-amber-300'>Note: {a.ucits[0].note}</div>}
-        <div>Data starts: {a.firstDate ?? '–'}</div>
-        <div className='break-words'>Sources: {a.segments.map((s) => `${s.source} ${s.from}→${s.to}`).join(' · ')}</div>
-      </dl>
-    </button>
+      <p className='mt-1.5 text-muted-foreground'>{WHAT[a.id]}</p>
+      <p className='mt-3 text-xs'>
+        <span className='text-muted-foreground'>e.g. </span>
+        {ex?.name ?? '–'}
+      </p>
+      {ex?.note && (
+        <p className='mt-2 flex gap-1.5 rounded-md bg-muted px-2 py-1.5 text-xs'>
+          <TriangleAlert className='mt-px size-3.5 shrink-0 text-muted-foreground' aria-hidden />
+          <span>Note: {ex.note}</span>
+        </p>
+      )}
+      <details className='relative z-10 mt-auto pt-3 text-xs text-muted-foreground'>
+        <summary className='cursor-pointer select-none hover:text-foreground'>Data source</summary>
+        <dl className='mt-1 space-y-0.5'>
+          <div>ID: <code>{a.id}</code></div>
+          <div>Data starts: {a.firstDate ?? '–'}</div>
+          <div>Sources: {a.segments.map((s) => `${s.source} ${s.from}→${s.to}`).join(' · ')}</div>
+        </dl>
+      </details>
+    </div>
   )
 }
 
 export function AssetsPage() {
   return (
-    <>
-      <Header>
-        <h1 className='me-auto font-semibold'>Assets & data</h1>
-        <ThemeSwitch />
-        <ConfigDrawer />
-      </Header>
+    <PageShell title='Assets & data' lede='What each building block is, how it has grown, and how closely the assets move together.'>
       <AssetsContent />
-    </>
+    </PageShell>
   )
 }
 
@@ -123,23 +141,22 @@ export function AssetsContent() {
   const rolling = useMemo(() => rollingCorrelation(data, pair[0], pair[1], 36), [pair])
   const selName = assetsOnly.find((a) => a.id === sel)?.name
   const picker = (i: 0 | 1) => (
-    <select aria-label={i ? 'Second asset' : 'First asset'} className='w-full rounded-md border bg-background px-2 py-1 text-sm sm:w-auto' value={pair[i]} onChange={(e) => setPair((p) => (i ? [p[0], e.target.value] : [e.target.value, p[1]]))}>
+    <select aria-label={i ? 'Second asset' : 'First asset'} className={`${selectClass} w-full font-normal sm:w-auto`} value={pair[i]} onChange={(e) => setPair((p) => (i ? [p[0], e.target.value] : [e.target.value, p[1]]))}>
       {assetsOnly.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
     </select>
   )
   return (
-    <>
-      <Main className='space-y-4'>
+    <div className='space-y-4'>
         <div className='grid gap-3 md:grid-cols-2 xl:grid-cols-3'>
           {assetsOnly.map((a) => <AssetCard key={a.id} a={a} selected={a.id === sel} onSelect={() => setSel(a.id)} />)}
         </div>
         <Card className='min-w-0'>
-          <CardHeader className='flex-row items-center justify-between'>
+          <CardHeader className='flex flex-row items-start justify-between gap-3'>
             <CardTitle className='text-base'>Growth of 10,000: {selName}</CardTitle>
-            <label className='flex items-center gap-2 text-xs'><Switch checked={log} onCheckedChange={setLog} /> Log scale</label>
+            <ScaleToggle log={log} setLog={setLog} />
           </CardHeader>
           <CardContent>
-            <div className='h-64'><Suspense fallback={null}><GrowthChart rows={rows} log={log} /></Suspense></div>
+            <div className='h-64' role='img' aria-label={`Line chart: growth of 10,000 invested in ${selName}`}><Suspense fallback={null}><GrowthChart rows={rows} log={log} /></Suspense></div>
             <p className='mt-2 text-xs text-muted-foreground'>Total return in US dollars, starting at 10,000 in the first month of data.</p>
           </CardContent>
         </Card>
@@ -153,7 +170,7 @@ export function AssetsContent() {
         <Card className='min-w-0'>
           <CardHeader><CardTitle className='flex min-w-0 flex-wrap items-center gap-2 text-base'>Correlation over time: {picker(0)} vs {picker(1)}</CardTitle></CardHeader>
           <CardContent>
-            <div className='h-64'><Suspense fallback={null}><RollingChart rows={rolling} /></Suspense></div>
+            <div className='h-64' role='img' aria-label='Line chart: 36-month correlation between the two assets over time'><Suspense fallback={null}><RollingChart rows={rolling} /></Suspense></div>
             <p className='mt-2 text-xs text-muted-foreground'>Each point looks at the previous 36 months. It is not constant: assets that diversify in calm times can fall together in crises.</p>
           </CardContent>
         </Card>
@@ -165,7 +182,6 @@ export function AssetsContent() {
             </CardContent>
           </Card>
         )}
-      </Main>
-    </>
+    </div>
   )
 }

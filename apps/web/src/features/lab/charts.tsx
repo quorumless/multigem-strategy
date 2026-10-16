@@ -3,10 +3,9 @@ import type { BacktestResult } from 'engine'
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ReferenceDot, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { fullYears, heatmapRows } from '@/lib/chart-data'
 import { BENCH_COLOR, CAT, STRATEGY, diverging } from '@/lib/chart-colors'
-import { ChartLegend, ChartTooltip, Panel } from '@/lib/chart-parts'
+import { ChartLegend, ChartTooltip, Panel, ScaleToggle } from '@/lib/chart-parts'
 import { axisTick, compactMoney, dateAxisProps, gridProps, niceTicks, valueAxisProps, yearTicks } from '@/lib/chart-theme'
 import { MONTH_ABBR, money, monthName, pct } from '@/lib/format'
-import { cn } from '@/lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { assetLabel, holdableAssets } from './assets'
 import { START_AMOUNT } from './results'
@@ -15,24 +14,6 @@ const BENCH: Record<string, string> = { BH_US: 'US stocks only', '6040': '60/40 
 // An asset keeps its color whatever else is held (color follows entity).
 const assetColor = (id: string) => CAT[Math.max(0, holdableAssets.findIndex((a) => a.id === id)) % CAT.length]!
 const pctTick = (v: number) => `${v}%`
-
-function ScaleToggle({ log, setLog }: { log: boolean; setLog: (v: boolean) => void }) {
-  return (
-    <div role='group' aria-label='Scale' className='flex rounded-md border p-0.5 text-xs'>
-      {[false, true].map((v) => (
-        <button
-          key={String(v)}
-          type='button'
-          aria-pressed={log === v}
-          onClick={() => setLog(v)}
-          className={cn('rounded px-2 py-0.5', log === v ? 'bg-secondary font-medium text-foreground' : 'text-muted-foreground hover:text-foreground')}
-        >
-          {v ? 'Log' : 'Linear'}
-        </button>
-      ))}
-    </div>
-  )
-}
 
 export default function Charts({ result }: { result: BacktestResult }) {
   const [log, setLog] = useState(false)
@@ -207,6 +188,11 @@ export default function Charts({ result }: { result: BacktestResult }) {
               ))}
             </tbody>
           </table>
+          <div className='mt-3 flex items-center gap-2 text-xs text-muted-foreground' aria-hidden>
+            <span className='tabular-nums'>−8%</span>
+            <span className='h-2 w-32 rounded-full' style={{ background: `linear-gradient(90deg, ${diverging(-0.75)}, ${diverging(0)}, ${diverging(0.75)})` }} />
+            <span className='tabular-nums'>+8%</span>
+          </div>
         </CardContent>
       </Card>
     </div>

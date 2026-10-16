@@ -8,9 +8,10 @@ describe('explainer', () => {
   it('shows real signals from the 2008 switch (scores vs the T-bill hurdle)', async () => {
     const { getByText, container } = await render(<Walkthrough />)
     await expect.element(getByText(/Moving out: /)).toBeInTheDocument()
-    await expect.element(getByText('T-bills (the bar to beat)').first()).toBeInTheDocument()
+    await expect.element(getByText(/The bar to beat \(T-bills\)/).first()).toBeInTheDocument()
     expect(container.textContent).toMatch(/Moving out: \w+ (2007|2008|2009)/)
-    expect(container.textContent).toMatch(/-?\d+\.\d% over 12 months/)
+    expect(container.textContent).toMatch(/Momentum over the last 12 months/)
+    expect(container.textContent).toMatch(/-?\d+\.\d%/)
   })
 })
 

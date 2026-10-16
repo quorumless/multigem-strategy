@@ -1,5 +1,5 @@
 import { lazy, Suspense, useMemo, useState } from 'react'
-import { Check, Info } from 'lucide-react'
+import { Check, ChevronDown, Info } from 'lucide-react'
 import { data } from '@/data/source'
 import { errorMessage } from '@/lib/run'
 import { bestIndexes, compareRuns, summarySentence, toEntries, type Entry } from '@/lib/compare'
@@ -42,16 +42,20 @@ const rows: Row[] = [
   metric('cagr', (v) => pct(v)),
   metric('maxDrawdown', (v) => pct(v, 0)),
   metric('maxDrawdownRecoveryMonths', (v) => `${v} months`),
+  { k: 'cagr', label: 'Years behind US stocks', better: 'lower', get: (r) => r.behind?.yearsBehind ?? null, fmt: (v, r) => `${v} of ${r.behind?.fullYears}` },
+]
+/** Ratios a beginner can skip (PRD U1): shown on request. */
+const advancedRows: Row[] = [
   metric('volatility', (v) => pct(v)),
   metric('sharpe', (v) => num(v)),
   metric('sortino', (v) => num(v)),
   metric('calmar', (v) => num(v)),
   metric('ulcer', (v) => num(v * 100, 1)),
   metric('switchesPerYear', (v) => num(v, 1)),
-  { k: 'cagr', label: 'Years behind US stocks', better: 'lower', get: (r) => r.behind?.yearsBehind ?? null, fmt: (v, r) => `${v} of ${r.behind?.fullYears}` },
 ]
 
 export function MetricsTable({ results }: { results: Entry[] }) {
+  const [advanced, setAdvanced] = useState(false)
   return (
     <div className='overflow-x-auto'>
       <Table>
@@ -78,7 +82,7 @@ export function MetricsTable({ results }: { results: Entry[] }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map((row) => {
+          {[...rows, ...(advanced ? advancedRows : [])].map((row) => {
             const vals = results.map(row.get)
             const best = bestIndexes(vals, row.better)
             return (
@@ -106,7 +110,16 @@ export function MetricsTable({ results }: { results: Entry[] }) {
           })}
         </TableBody>
       </Table>
-    </div>
+      <button
+          type='button'
+          aria-expanded={advanced}
+          onClick={() => setAdvanced(!advanced)}
+          className='mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline'
+        >
+          {advanced ? 'Hide advanced rows' : `Show advanced rows (${advancedRows.length})`}
+          <ChevronDown className={`size-4 transition-transform ${advanced ? 'rotate-180' : ''}`} aria-hidden />
+        </button>
+      </div>
   )
 }
 
@@ -131,13 +144,13 @@ export function Compare() {
           <CardTitle>Pick up to {MAX} strategies</CardTitle>
           <CardDescription>Your saved strategies and the ready-made ones. Costs, tax and currency come from the Settings you chose on the main page.</CardDescription>
         </CardHeader>
-        <CardContent className='grid gap-2 sm:grid-cols-2 xl:grid-cols-3'>
-          <label className='flex items-center gap-2 text-sm'>
+        <CardContent className='flex flex-wrap gap-2'>
+          <label className='flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors hover:bg-accent/60 has-[button[data-state=checked]]:border-primary has-[button[data-state=checked]]:bg-accent/60 has-[button:disabled]:cursor-not-allowed has-[button:disabled]:opacity-60'>
             <Checkbox checked={withSp} onCheckedChange={(c) => setWithSp(c === true)} />
             S&P 500 (buy & hold) <span className='text-xs text-muted-foreground'>(for comparison)</span>
           </label>
           {options.map((o) => (
-            <label key={o.id} className='flex items-center gap-2 text-sm'>
+            <label key={o.id} className='flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors hover:bg-accent/60 has-[button[data-state=checked]]:border-primary has-[button[data-state=checked]]:bg-accent/60 has-[button:disabled]:cursor-not-allowed has-[button:disabled]:opacity-60'>
               <Checkbox
                 checked={picked.includes(o.id)}
                 disabled={!picked.includes(o.id) && picked.length >= MAX}

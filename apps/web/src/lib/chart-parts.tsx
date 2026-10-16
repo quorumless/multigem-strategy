@@ -95,3 +95,22 @@ export function Panel({
     </Card>
   )
 }
+
+/** Linear | Log segmented control for growth charts. */
+export function ScaleToggle({ log, setLog }: { log: boolean; setLog: (v: boolean) => void }) {
+  return (
+    <div role='group' aria-label='Scale' className='flex rounded-md border p-0.5 text-xs'>
+      {[false, true].map((v) => (
+        <button
+          key={String(v)}
+          type='button'
+          aria-pressed={log === v}
+          onClick={() => setLog(v)}
+          className={cn('rounded px-2 py-0.5', log === v ? 'bg-secondary font-medium text-foreground' : 'text-muted-foreground hover:text-foreground')}
+        >
+          {v ? 'Log' : 'Linear'}
+        </button>
+      ))}
+    </div>
+  )
+}

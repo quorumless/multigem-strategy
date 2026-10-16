@@ -7,7 +7,7 @@ import { errorMessage } from '@/lib/run'
 import { listStrategies } from '@/lib/saved'
 import { fragileCheck } from '@/lib/sensitivity'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
+import { ShieldCheck, TriangleAlert } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageShell } from '@/components/page-shell'
 import { Labelled, selectClass } from '@/features/lab/info-tip'
@@ -112,14 +112,22 @@ export function Sensitivity() {
       </Card>
 
       {fragile && (
-        <Alert>
-          <AlertDescription className='flex flex-wrap items-center gap-2'>
-            <Badge variant={fragile.fragile ? 'destructive' : 'secondary'}>{fragile.fragile ? 'Fragile' : 'Stable'}</Badge>
+        <section aria-label='Verdict' className='flex gap-4 rounded-xl border bg-card p-5'>
+          <span
+            className='flex size-10 shrink-0 items-center justify-center rounded-full'
+            style={{ background: `color-mix(in oklab, var(${fragile.fragile ? '--div-neg' : '--div-pos'}) 16%, transparent)` }}
+          >
+            {fragile.fragile ? <TriangleAlert className='size-5 text-[var(--div-neg)]' aria-hidden /> : <ShieldCheck className='size-5 text-[var(--div-pos)]' aria-hidden />}
+          </span>
+          <div>
+            <div className='font-display text-lg font-semibold'>{fragile.fragile ? 'Fragile' : 'Stable'}</div>
+            <p className='text-sm text-muted-foreground'>
             {fragile.fragile
               ? `Moving the lookback by one month changes yearly growth by up to ${pp(dCagr)} and the worst fall by up to ${pp(dDd)}. The result may depend on luck in the chosen window.`
               : `Moving the lookback by one month changes yearly growth by at most ${pp(dCagr)} and the worst fall by at most ${pp(dDd)}.`}
-          </AlertDescription>
-        </Alert>
+            </p>
+          </div>
+        </section>
       )}
 
       {out.error ? (
