@@ -113,16 +113,33 @@ export function Builder({
     if (withSettings) setSettings(s)
   }
   const save = () => {
-    const next = [...saved.filter((s) => s.name !== input.name), { name: input.name, config: input }]
+    // a preset's name is reserved: saving a tweaked preset makes "My <preset>"
+    const n = presets.some((p) => p.config.name === input.name) ? `My ${input.name}` : input.name
+    const config = { ...input, name: n }
+    const exists = saved.some((s) => s.name === n)
+    const next = exists ? saved.map((s) => (s.name === n ? { name: n, config } : s)) : [...saved, { name: n, config }]
     if (writeJson(SAVED_KEY, next)) {
       setSaved(next)
-      toast.success(`Saved "${input.name}" in this browser.`)
+      if (n !== input.name) form.setValue('name', n)
+      toast.success(`${exists ? 'Updated' : 'Saved'} "${n}" in this browser.`)
     } else toast.error("Couldn't save: browser storage is unavailable.")
   }
-  const del = (name: string) => {
-    const next = saved.filter((s) => s.name !== name)
-    writeJson(SAVED_KEY, next)
+  const del = (s: Saved[number]) => {
+    const i = saved.indexOf(s)
+    const next = saved.filter((x) => x !== s)
+    if (!writeJson(SAVED_KEY, next)) return toast.error("Couldn't delete: browser storage is unavailable.")
     setSaved(next)
+    toast(`Deleted "${s.name}".`, {
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          const back = readJson<Saved>(SAVED_KEY, []).filter((x) => x.name !== s.name)
+          back.splice(i, 0, s)
+          writeJson(SAVED_KEY, back)
+          setSaved(back)
+        },
+      },
+    })
   }
   const exportJson = () => {
     const url = URL.createObjectURL(new Blob([JSON.stringify(input, null, 2)], { type: 'application/json' }))
@@ -163,6 +180,32 @@ export function Builder({
             )
           })}
         </div>
+        {saved.length > 0 && (
+          <div className='space-y-2'>
+            <h3 className='text-sm font-medium'>Your strategies</h3>
+            <div className='grid grid-cols-1 gap-2 @[17rem]/builder:grid-cols-2'>
+              {saved.map((s) => {
+                const on = s.name === name
+                return (
+                  <div key={s.name} className='relative'>
+                    <button
+                      type='button'
+                      aria-pressed={on}
+                      onClick={() => load(s.config, true)}
+                      className={`h-full w-full rounded-lg border p-3 text-start transition-colors hover:border-primary/60 hover:bg-accent/60 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none ${on ? 'border-primary bg-accent/60 ring-1 ring-primary' : ''}`}
+                    >
+                      <div className='pe-8 text-sm font-medium'>{s.name}</div>
+                      <p className='mt-1 text-xs text-muted-foreground'>{s.config.sleeves.length === 1 ? '1 sleeve' : `${s.config.sleeves.length} sleeves`}</p>
+                    </button>
+                    <Button type='button' variant='ghost' size='icon' className='absolute end-1 top-1 size-7' aria-label={`Delete "${s.name}"`} onClick={() => del(s)}>
+                      <Trash2 className='size-4' />
+                    </Button>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
       </section>
 
       <section className='space-y-4 border-t pt-5'>
@@ -270,18 +313,6 @@ export function Builder({
           <Button type='button' size='sm' variant='outline' onClick={exportJson}>Export JSON</Button>
           <Button type='button' size='sm' variant='outline' onClick={() => fileRef.current?.click()}>Import JSON</Button>
           <input ref={fileRef} type='file' accept='application/json,.json' hidden onChange={(e) => e.target.files?.[0] && importJson(e.target.files[0])} />
-          {saved.length > 0 && (
-            <select className={selectClass} aria-label='Saved strategies' value='' onChange={(e) => { const s = saved.find((x) => x.name === e.target.value); if (s) load(s.config, true) }}>
-              <option value=''>Load saved…</option>
-              {saved.map((s) => <option key={s.name} value={s.name}>{s.name}</option>)}
-            </select>
-          )}
-          {saved.length > 0 && (
-            <select className={selectClass} aria-label='Delete saved strategy' value='' onChange={(e) => e.target.value && del(e.target.value)}>
-              <option value=''>Delete saved…</option>
-              {saved.map((s) => <option key={s.name} value={s.name}>{s.name}</option>)}
-            </select>
-          )}
         </div>
       </section>
     </div>

@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { render } from 'vitest-browser-react'
 import { glossary } from '@/lib/glossary'
 import { presets } from '@/lib/presets'
@@ -8,7 +9,7 @@ import { defaultSettings, fromStrategy, validate } from '@/lib/strategy-form'
 import { tradeSentence } from '@/lib/trade-sentence'
 import { parseConfig } from 'engine'
 import { assetLabel } from './assets'
-import { LookbackField } from './builder'
+import { Builder, LookbackField } from './builder'
 import { Headline } from './results'
 
 const gcfg = presets[0]!.config
@@ -74,5 +75,23 @@ describe('lookback stepper', () => {
     expect(lookbacks).toEqual([3, 6, 9, 12])
     await expect.element(getByRole('group').first()).toBeInTheDocument()
     expect(document.querySelectorAll('[role=spinbutton]').length).toBe(4)
+  })
+})
+
+describe('saved strategies', () => {
+  beforeEach(() => localStorage.clear())
+  function Harness() {
+    const form = useForm({ defaultValues: fx.form })
+    return <Builder form={form} setSettings={() => {}} input={validate(form.watch(), fx.settings).input} />
+  }
+
+  it('saves a tweaked preset as "My ..." and deletes it', async () => {
+    const { getByRole } = await render(<Harness />)
+    await getByRole('button', { name: 'Save' }).click()
+    const card = getByRole('button', { name: /^My / })
+    await expect.element(card).toBeInTheDocument()
+    await getByRole('button', { name: /^Delete "My / }).click()
+    await expect.element(getByRole('button', { name: /^My / })).not.toBeInTheDocument()
+    expect(JSON.parse(localStorage.getItem('multigem.saved') ?? '[]')).toEqual([])
   })
 })
