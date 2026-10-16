@@ -1,0 +1,6 @@
+{
+  "name": "GEM with EM",
+  "sleeves": [
+    { "id": "gem", "weight": 1, "universe": ["US", "DEVXUS", "EM"], "lookbacks": [12], "topN": 1, "absFilter": "tbill", "safeHaven": { "mode": "fixed", "asset": "AGG" } }
+  ]
+}

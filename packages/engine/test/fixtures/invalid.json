@@ -1,0 +1,4 @@
+{
+  "name": "Bad",
+  "sleeves": [{ "id": "gem", "weight": 0.5, "universe": ["US", "DEVXUS"], "lookback": [6] }]
+}

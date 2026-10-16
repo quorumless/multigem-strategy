@@ -1,0 +1,15 @@
+{
+  "name": "MultiGEM",
+  "sleeves": [
+    {
+      "id": "multi",
+      "weight": 1,
+      "universe": ["US", "DEVXUS", "EM", "GOLD", "BCOM", "LTT"],
+      "lookbacks": [3, 6, 9, 12],
+      "lookbackMode": "blend",
+      "topN": 2,
+      "absFilter": "tbill",
+      "safeHaven": { "mode": "bestOf", "assets": ["AGG", "TBILL"] }
+    }
+  ]
+}

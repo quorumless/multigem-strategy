@@ -1,0 +1,4 @@
+{
+  "name": "Fixture GEM",
+  "sleeves": [{ "id": "gem", "weight": 1, "universe": ["US", "DEVXUS"], "lookbacks": [6] }]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Multi-sleeve",
+  "sleeves": [
+    { "id": "equity", "weight": 0.6, "universe": ["US", "DEVXUS", "EM"], "lookbacks": [3, 6, 9, 12], "lookbackMode": "blend", "topN": 1, "absFilter": "tbill", "safeHaven": { "mode": "fixed", "asset": "AGG" } },
+    { "id": "real", "weight": 0.25, "universe": ["GOLD", "BCOM"], "lookbacks": [3, 6, 9, 12], "lookbackMode": "blend", "topN": 1, "absFilter": "tbill", "safeHaven": { "mode": "fixed", "asset": "TBILL" } },
+    { "id": "duration", "weight": 0.15, "universe": ["LTT", "AGG"], "lookbacks": [3, 6, 9, 12], "lookbackMode": "blend", "topN": 1, "absFilter": "tbill", "safeHaven": { "mode": "fixed", "asset": "TBILL" } }
+  ]
+}

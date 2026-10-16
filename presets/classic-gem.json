@@ -1,0 +1,6 @@
+{
+  "name": "Classic GEM",
+  "sleeves": [
+    { "id": "gem", "weight": 1, "universe": ["US", "ACWXUS"], "lookbacks": [12], "topN": 1, "absFilter": "tbill", "safeHaven": { "mode": "fixed", "asset": "AGG" } }
+  ]
+}

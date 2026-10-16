@@ -1,0 +1,286 @@
+[
+  {
+    "id": "US",
+    "name": "S&P 500 TR",
+    "role": "equity",
+    "firstDate": "1988-01",
+    "segments": [
+      {
+        "source": "yahoo",
+        "ticker": "^SP500TR",
+        "note": "",
+        "from": "1988-01",
+        "to": "2026-09"
+      }
+    ],
+    "ucits": [
+      {
+        "name": "iShares Core S&P 500 (CSPX)"
+      },
+      {
+        "name": "Vanguard S&P 500 (VUAA)"
+      }
+    ],
+    "notes": "SYNTHETIC SAMPLE \u2014 not real market data",
+    "synthetic": true
+  },
+  {
+    "id": "DEVXUS",
+    "name": "MSCI World ex USA",
+    "role": "equity",
+    "firstDate": "1997-01",
+    "segments": [
+      {
+        "source": "msci.com",
+        "ticker": "991000",
+        "variant": "NETR",
+        "from": "1997-01",
+        "to": "2026-09"
+      }
+    ],
+    "ucits": [
+      {
+        "name": "Xtrackers MSCI World ex USA (EXUS)"
+      }
+    ],
+    "notes": "SYNTHETIC SAMPLE \u2014 not real market data",
+    "synthetic": true
+  },
+  {
+    "id": "EM",
+    "name": "MSCI Emerging Markets",
+    "role": "equity",
+    "firstDate": "1997-01",
+    "segments": [
+      {
+        "source": "msci.com",
+        "ticker": "891800",
+        "variant": "GRTR",
+        "from": "1997-01",
+        "to": "2026-09"
+      },
+      {
+        "source": "msci.com",
+        "ticker": "891800",
+        "variant": "NETR",
+        "from": "1997-01",
+        "to": "2026-09"
+      }
+    ],
+    "ucits": [
+      {
+        "name": "iShares Core MSCI EM IMI (EIMI)"
+      }
+    ],
+    "notes": "SYNTHETIC SAMPLE \u2014 not real market data",
+    "synthetic": true
+  },
+  {
+    "id": "ACWXUS",
+    "name": "MSCI ACWI ex USA",
+    "role": "equity \u2014 Classic GEM preset only",
+    "firstDate": "1996-04",
+    "segments": [
+      {
+        "source": "yahoo",
+        "ticker": "VGTSX",
+        "note": "Vanguard Total International Stock Index (Investor)",
+        "gate": true,
+        "from": "1996-04",
+        "to": "2026-09"
+      },
+      {
+        "source": "msci.com",
+        "ticker": "899901",
+        "variant": "GRTR",
+        "from": "1996-04",
+        "to": "2026-09"
+      },
+      {
+        "source": "msci.com",
+        "ticker": "899901",
+        "variant": "NETR",
+        "from": "1996-04",
+        "to": "2026-09"
+      }
+    ],
+    "ucits": [
+      {
+        "name": "Xtrackers FTSE All-World ex US UCITS ETF 1C (AWEX)",
+        "isin": "IE000YKHGYN2",
+        "note": "Tracks FTSE All-World ex US, not MSCI ACWI ex USA (no UCITS ETF on the MSCI index found); issuer page etf.dws.com, TER 0.15% (justETF)"
+      }
+    ],
+    "notes": "SYNTHETIC SAMPLE \u2014 not real market data",
+    "synthetic": true
+  },
+  {
+    "id": "AGG",
+    "name": "US Aggregate Bonds",
+    "role": "safe haven",
+    "firstDate": "1988-01",
+    "segments": [
+      {
+        "source": "yahoo",
+        "ticker": "VBMFX",
+        "note": "Vanguard Total Bond Market Index (Investor)",
+        "from": "1988-01",
+        "to": "2026-09"
+      }
+    ],
+    "ucits": [
+      {
+        "name": "iShares Core US Aggregate Bond UCITS"
+      }
+    ],
+    "notes": "SYNTHETIC SAMPLE \u2014 not real market data",
+    "synthetic": true
+  },
+  {
+    "id": "LTT",
+    "name": "US Treasuries 20+y",
+    "role": "diversifier / safe haven",
+    "firstDate": "1988-01",
+    "segments": [
+      {
+        "source": "yahoo",
+        "ticker": "VUSTX",
+        "note": "Vanguard Long-Term Treasury (Investor)",
+        "from": "1988-01",
+        "to": "2026-09"
+      }
+    ],
+    "ucits": [
+      {
+        "name": "iShares $ Treasury Bond 20+yr (IDTL/DTLA)"
+      }
+    ],
+    "notes": "SYNTHETIC SAMPLE \u2014 not real market data",
+    "synthetic": true
+  },
+  {
+    "id": "TBILL",
+    "name": "3-month T-bills",
+    "role": "cash, absolute-momentum hurdle",
+    "firstDate": "1988-01",
+    "segments": [
+      {
+        "source": "FRED",
+        "ticker": "TB3MS",
+        "note": "r[t] = TB3MS[t-1]/1200, STRATEGY_SPEC \u00a71",
+        "from": "1988-01",
+        "to": "2026-09"
+      }
+    ],
+    "ucits": [
+      {
+        "name": "iShares $ Treasury Bond 0-1yr (IB01)"
+      }
+    ],
+    "notes": "SYNTHETIC SAMPLE \u2014 not real market data",
+    "synthetic": true
+  },
+  {
+    "id": "GOLD",
+    "name": "Gold (spot, physically-backed ETC)",
+    "role": "diversifier",
+    "firstDate": "1988-01",
+    "segments": [
+      {
+        "source": "gold.org chart API",
+        "ticker": "goldprice/v11/chart/price/usd/oz",
+        "note": "daily LBMA PM USD/oz, month-end observation",
+        "from": "1988-01",
+        "to": "2026-09"
+      }
+    ],
+    "ucits": [
+      {
+        "name": "iShares Physical Gold (IGLN)"
+      },
+      {
+        "name": "Invesco Physical Gold (SGLD)"
+      },
+      {
+        "name": "Xetra-Gold (4GLD)"
+      }
+    ],
+    "notes": "SYNTHETIC SAMPLE \u2014 not real market data",
+    "synthetic": true
+  },
+  {
+    "id": "BCOM",
+    "name": "Bloomberg Commodity TR (broad basket)",
+    "role": "diversifier",
+    "firstDate": "2002-07",
+    "segments": [
+      {
+        "source": "yahoo",
+        "ticker": "PCRIX",
+        "note": "PIMCO CommodityRealReturn Strategy (actively managed, tracks BCOM)",
+        "from": "2002-07",
+        "to": "2026-09"
+      },
+      {
+        "source": "yahoo",
+        "ticker": "DJP",
+        "note": "iPath Bloomberg Commodity Index TR ETN",
+        "from": "2002-07",
+        "to": "2026-09"
+      }
+    ],
+    "ucits": [
+      {
+        "name": "iShares Diversified Commodity Swap UCITS"
+      },
+      {
+        "name": "UBS CMCI Composite"
+      }
+    ],
+    "notes": "SYNTHETIC SAMPLE \u2014 not real market data",
+    "synthetic": true
+  },
+  {
+    "id": "FX_EUR",
+    "name": "EUR per 1 USD",
+    "role": "fx",
+    "firstDate": "1999-01",
+    "segments": [
+      {
+        "source": "FRED",
+        "ticker": "DEXUSEU",
+        "note": "USD per EUR, inverted; last obs of month",
+        "from": "1999-01",
+        "to": "2026-09"
+      }
+    ],
+    "ucits": [],
+    "notes": "SYNTHETIC SAMPLE \u2014 not real market data",
+    "synthetic": true
+  },
+  {
+    "id": "FX_PLN",
+    "name": "PLN per 1 USD",
+    "role": "fx",
+    "firstDate": "1995-01",
+    "segments": [
+      {
+        "source": "FRED/OECD",
+        "ticker": "CCUSSP01PLM650N",
+        "note": "USD per PLN spot, inverted",
+        "from": "1995-01",
+        "to": "2026-09"
+      },
+      {
+        "source": "NBP",
+        "ticker": "api.nbp.pl table A USD mid",
+        "note": "PLN per USD, last fixing of month",
+        "from": "1995-01",
+        "to": "2026-09"
+      }
+    ],
+    "ucits": [],
+    "notes": "SYNTHETIC SAMPLE \u2014 not real market data",
+    "synthetic": true
+  }
+]

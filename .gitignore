@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+.DS_Store
+*.log
+data/raw/
+.venv/
+__pycache__/
+*.pyc
+.vitest-attachments/
+test-results/
+
+# real data stays local (see docs/DATA.md); data/sample/ is the committed synthetic stand-in
+data/processed/
