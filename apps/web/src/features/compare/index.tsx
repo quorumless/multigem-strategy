@@ -125,7 +125,7 @@ export function Compare() {
   }, [picked, options, withSp])
 
   return (
-    <PageShell title='Compare strategies'>
+    <PageShell title='Compare strategies' lede='Put strategies side by side over the same period, with the same costs and tax.'>
       <Card>
         <CardHeader>
           <CardTitle>Pick up to {MAX} strategies</CardTitle>
@@ -168,9 +168,9 @@ export function Compare() {
               {monthName(out.range.start)} to {monthName(out.range.end)}.
             </AlertDescription>
           </Alert>
-          <p className='text-lg font-medium'>{summarySentence(out.entries)}</p>
+          <p className='font-display text-xl font-semibold text-balance sm:text-2xl'>{summarySentence(out.entries)}</p>
           <Card>
-            <CardContent className='pt-6'>
+            <CardContent>
               <MetricsTable results={out.entries} />
               <p className='mt-2 text-xs text-muted-foreground'>A tick and shading mark the best value in each row.</p>
             </CardContent>
