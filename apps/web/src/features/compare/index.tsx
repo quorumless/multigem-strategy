@@ -1,5 +1,5 @@
 import { lazy, Suspense, useMemo, useState } from 'react'
-import { Info } from 'lucide-react'
+import { Check, Info } from 'lucide-react'
 import { data } from '@/data/source'
 import { errorMessage } from '@/lib/run'
 import { bestIndexes, compareRuns, summarySentence, toEntries, type Entry } from '@/lib/compare'
@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { PageShell } from '@/components/page-shell'
+import { BENCH_COLOR, CAT } from '@/lib/chart-colors'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { InfoTip } from '@/features/lab/info-tip'
@@ -82,12 +83,22 @@ export function MetricsTable({ results }: { results: Entry[] }) {
             const best = bestIndexes(vals, row.better)
             return (
               <TableRow key={row.label}>
-                <TableCell className='whitespace-nowrap font-medium'>
+                <TableCell className='sticky start-0 z-10 bg-card font-medium whitespace-nowrap'>
                   {row.label} <InfoTip k={row.k} />
                 </TableCell>
                 {results.map((r, i) => (
-                  <TableCell key={r.name} data-best={best.has(i)} className={best.has(i) ? 'bg-green-500/15 font-semibold' : undefined}>
+                  <TableCell
+                    key={r.name}
+                    data-best={best.has(i)}
+                    className={best.has(i) ? 'bg-[color-mix(in_oklab,var(--div-pos)_14%,transparent)] font-semibold tabular-nums' : 'tabular-nums'}
+                  >
                     {vals[i] == null ? '–' : row.fmt(vals[i], r)}
+                    {best.has(i) && (
+                      <>
+                        <Check className='ms-1 inline size-3.5 align-[-2px] text-[var(--div-pos)]' aria-hidden />
+                        <span className='sr-only'> (best)</span>
+                      </>
+                    )}
                   </TableCell>
                 ))}
               </TableRow>
@@ -140,7 +151,7 @@ export function Compare() {
 
       {!options.some((o) => o.source === 'saved') && (
         <p className='text-sm text-muted-foreground'>
-          {storageAvailable() ? "You haven't saved any strategies yet. Build one on the Dashboard and press Save to compare it here." : "Saving isn't available in this browser (private mode?), so only the ready-made strategies are listed."}
+          {storageAvailable() ? "You haven't saved any strategies yet. Build one on the Backtest page and press Save to compare it here." : "Saving isn't available in this browser (private mode?), so only the ready-made strategies are listed."}
         </p>
       )}
       {!out && <p className='text-sm text-muted-foreground'>Pick a strategy and the S&P 500, or at least two strategies, to compare.</p>}
@@ -161,11 +172,11 @@ export function Compare() {
           <Card>
             <CardContent className='pt-6'>
               <MetricsTable results={out.entries} />
-              <p className='mt-2 text-xs text-muted-foreground'>Green marks the best value in each row.</p>
+              <p className='mt-2 text-xs text-muted-foreground'>A tick and shading mark the best value in each row.</p>
             </CardContent>
           </Card>
           <Suspense fallback={<p className='text-sm text-muted-foreground'>Loading charts…</p>}>
-            <CompareCharts results={out.entries} />
+            <CompareCharts results={out.entries} colorOf={(e) => (e.isBenchmark ? BENCH_COLOR.BH_US! : CAT[Math.max(0, options.findIndex((o) => o.name === e.name)) % CAT.length]!)} />
           </Suspense>
         </>
       )}

@@ -6,10 +6,10 @@ export const sidebarData: SidebarData = {
     {
       title: 'General',
       items: [
-        { title: 'Dashboard', url: '/', icon: LayoutDashboard },
+        { title: 'Backtest', url: '/', icon: LayoutDashboard },
         { title: 'What to hold now', url: '/now', icon: Compass },
         { title: 'Compare', url: '/compare', icon: GitCompare },
-        { title: 'Sensitivity', url: '/sensitivity', icon: SlidersHorizontal },
+        { title: 'Robustness', url: '/sensitivity', icon: SlidersHorizontal },
         { title: 'Assets & data', url: '/assets', icon: Database },
         { title: 'How GEM works', url: '/how-it-works', icon: BookOpen },
       ],

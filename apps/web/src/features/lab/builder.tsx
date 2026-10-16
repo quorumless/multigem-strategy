@@ -1,14 +1,13 @@
 import { useRef, useState } from 'react'
-import { Controller, useFieldArray, type UseFormReturn } from 'react-hook-form'
+import { Controller, useFieldArray, useWatch, type UseFormReturn } from 'react-hook-form'
 import { parseConfig, StrategySchema, type StrategyInput } from 'engine'
-import { Plus, Trash2 } from 'lucide-react'
+import { Check, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { presets } from '@/lib/presets'
 import { SAVED_KEY, type Saved } from '@/lib/saved'
 import { readJson, storageAvailable, writeJson } from '@/lib/storage'
 import { fromStrategy, newSleeve, type FormValues, type SettingsValues } from '@/lib/strategy-form'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
@@ -17,7 +16,7 @@ import { InfoTip, Labelled, selectClass } from './info-tip'
 
 function AssetPicker({ value, onChange, advanced }: { value: string[]; onChange: (v: string[]) => void; advanced: boolean }) {
   return (
-    <div className='grid gap-1 sm:grid-cols-2'>
+    <div className='grid gap-x-4 gap-y-2 @2xl/builder:grid-cols-2'>
       {riskyAssets.map((a) => (
         <label key={a.id} className='flex items-start gap-2 text-sm'>
           <Checkbox
@@ -49,6 +48,7 @@ export function Builder({
   const fileRef = useRef<HTMLInputElement>(null)
   const { fields, append, remove } = useFieldArray({ control: form.control, name: 'sleeves' })
   const multi = fields.length > 1
+  const name = useWatch({ control: form.control, name: 'name' })
 
   const load = (config: unknown, withSettings: boolean) => {
     const r = StrategySchema.safeParse(config)
@@ -84,28 +84,35 @@ export function Builder({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>1. Pick a starting point</CardTitle>
-        <CardDescription>Choose a ready-made idea, then tweak it below.</CardDescription>
-      </CardHeader>
-      <CardContent className='space-y-5'>
-        <div className='grid gap-3 sm:grid-cols-2 xl:grid-cols-4'>
-          {presets.map((p) => (
-            <button
-              key={p.config.name}
-              type='button'
-              onClick={() => load(p.config, false)}
-              className='rounded-lg border p-3 text-start transition hover:border-primary hover:bg-accent'
-            >
-              <div className='font-medium'>{p.config.name}</div>
-              <p className='mt-1 text-xs text-muted-foreground'>{p.story}</p>
-            </button>
-          ))}
+    <div className='space-y-5'>
+      <section className='space-y-3'>
+        <div>
+          <h2 className='font-semibold'>Start from</h2>
+          <p className='text-sm text-muted-foreground'>Choose a ready-made idea, then tweak it below.</p>
         </div>
+        <div className='grid grid-cols-1 gap-2 @[17rem]/builder:grid-cols-2'>
+          {presets.map((p) => {
+            const on = p.config.name === name
+            return (
+              <button
+                key={p.config.name}
+                type='button'
+                aria-pressed={on}
+                onClick={() => load(p.config, false)}
+                className={`relative rounded-lg border p-3 text-start transition-colors hover:border-primary/60 hover:bg-accent/60 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none ${on ? 'border-primary bg-accent/60 ring-1 ring-primary' : ''}`}
+              >
+                <div className='pe-5 text-sm font-medium'>{p.config.name}</div>
+                {on && <Check className='absolute end-2.5 top-3 size-4 text-primary' aria-hidden />}
+                <p className='mt-1 text-xs leading-snug text-muted-foreground'>{p.story}</p>
+              </button>
+            )
+          })}
+        </div>
+      </section>
 
-        <div className='flex flex-wrap items-center justify-between gap-3 border-t pt-4'>
-          <h3 className='font-semibold'>2. Adjust</h3>
+      <section className='space-y-4 border-t pt-5'>
+        <div className='flex flex-wrap items-center justify-between gap-3'>
+          <h2 className='font-semibold'>Adjust</h2>
           <label className='flex items-center gap-2 text-sm'>
             <Switch checked={advanced} onCheckedChange={setAdvanced} /> Advanced options
           </label>
@@ -202,7 +209,7 @@ export function Builder({
           </div>
         )}
 
-        <div className='flex flex-wrap items-center gap-2 border-t pt-4'>
+        <div className='flex flex-wrap items-center gap-2 pt-1'>
           {!storageAvailable() && <p className='w-full text-xs text-muted-foreground'>Saving isn't available in this browser (private mode?). Use Export JSON to keep your strategy.</p>}
           <Button type='button' size='sm' onClick={save}>Save</Button>
           <Button type='button' size='sm' variant='outline' onClick={exportJson}>Export JSON</Button>
@@ -221,7 +228,7 @@ export function Builder({
             </select>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </section>
+    </div>
   )
 }

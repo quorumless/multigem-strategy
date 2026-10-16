@@ -83,7 +83,7 @@ export function Sensitivity() {
   const dDd = fragile ? Math.max(...fragile.near.map((n) => Math.abs(n.maxDrawdown - fragile.base.maxDrawdown))) : 0
 
   return (
-    <PageShell title='How sensitive is it?'>
+    <PageShell title='Robustness' lede='Would small changes to the settings, or a different start date, have changed the result a lot?'>
       <Card>
         <CardHeader>
           <CardTitle>Change one setting, see what happens</CardTitle>
@@ -133,7 +133,7 @@ export function Sensitivity() {
           </CardHeader>
           <CardContent className='h-72'>
             <Suspense fallback={<p className='text-sm text-muted-foreground'>Loading chart…</p>}>
-              <SensChart points={points} current={current} unit={m.unit} />
+              <SensChart points={points} current={current} unit={m.unit} name={glossary[mk]!.label} />
             </Suspense>
           </CardContent>
         </Card>
@@ -157,10 +157,10 @@ export function Sensitivity() {
           </label>
           <div className='h-64'>
             <Suspense fallback={null}>
-              <SensChart points={rolling.map((w) => ({ x: String(w.startYear), y: w.value! * 100 }))} unit='%' />
+              <SensChart points={rolling.map((w) => ({ x: String(w.startYear), y: w.value! * 100 }))} unit='%' name={`${horizon}-year yearly growth`} typical={median * 100} />
             </Suspense>
           </div>
-          <p className='text-xs text-muted-foreground'>Each point starts in January of that year. Past results don't guarantee future ones.</p>
+          <p className='text-xs text-muted-foreground'>Each point starts in January of that year; the dashed line is the typical value ({pct(median)}). Past results don't guarantee future ones.</p>
         </CardContent>
       </Card>
     </PageShell>

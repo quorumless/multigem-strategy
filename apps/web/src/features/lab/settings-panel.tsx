@@ -1,5 +1,4 @@
 import type { SettingsValues } from '@/lib/strategy-form'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Labelled, selectClass } from './info-tip'
@@ -19,12 +18,12 @@ export function SettingsPanel({ value, onChange }: { value: SettingsValues; onCh
     />
   )
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>3. Real-life costs</CardTitle>
-        <CardDescription>Defaults are for a Polish investor. Results are always shown after these.</CardDescription>
-      </CardHeader>
-      <CardContent className='flex flex-wrap items-end gap-6'>
+    <section className='space-y-3 border-t pt-5'>
+      <div>
+        <h2 className='font-semibold'>Costs &amp; tax</h2>
+        <p className='text-sm text-muted-foreground'>Defaults are for a Polish investor. Results are always shown after these.</p>
+      </div>
+      <div className='flex flex-wrap items-end gap-x-6 gap-y-4'>
         <label className='space-y-1'>
           <Labelled k='currency' />
           <select className={`${selectClass} block`} value={value.currency} onChange={(e) => set('currency', e.target.value as SettingsValues['currency'])}>
@@ -50,7 +49,7 @@ export function SettingsPanel({ value, onChange }: { value: SettingsValues; onCh
             {numField('taxRate', !value.taxOn)}
           </label>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
