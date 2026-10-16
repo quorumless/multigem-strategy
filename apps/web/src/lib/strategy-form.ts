@@ -7,8 +7,8 @@ export interface SleeveForm {
   /** Percent, 0–100. */
   weight: number
   universe: string[]
-  /** Comma-separated months, e.g. "3, 6, 12". */
-  lookbacks: string
+  /** Whole months 1–12, sorted, unique. */
+  lookbacks: number[]
   topN: number
   /** Percent. */
   buffer: number
@@ -39,7 +39,6 @@ export interface SettingsValues {
 export const defaultSettings: SettingsValues = { currency: 'PLN', costPct: 0.1, fxCostPct: 0.2, taxOn: true, taxRate: 19 }
 
 const r6 = (x: number) => Math.round(x * 1e6) / 1e6
-const parseLookbacks = (s: string) => s.split(/[,\s]+/).filter(Boolean).map(Number)
 
 export function toInput(f: FormValues, s: SettingsValues): StrategyInput {
   return {
@@ -49,7 +48,7 @@ export function toInput(f: FormValues, s: SettingsValues): StrategyInput {
       id: x.id,
       weight: r6(x.weight / 100),
       universe: x.universe,
-      lookbacks: parseLookbacks(x.lookbacks),
+      lookbacks: x.lookbacks,
       topN: x.topN,
       buffer: r6(x.buffer / 100),
       weighting: x.invVol ? 'invVol' : 'equal',
@@ -77,7 +76,7 @@ export function fromStrategy(c: Strategy): { form: FormValues; settings: Setting
         id: s.id,
         weight: r6(s.weight * 100),
         universe: s.universe,
-        lookbacks: s.lookbacks.join(', '),
+        lookbacks: s.lookbacks,
         topN: s.topN,
         buffer: r6(s.buffer * 100),
         invVol: s.weighting === 'invVol',
@@ -97,7 +96,7 @@ export const newSleeve = (id: string, weight: number): SleeveForm => ({
   id,
   weight,
   universe: ['US', 'DEVXUS'],
-  lookbacks: '12',
+  lookbacks: [12],
   topN: 1,
   buffer: 0,
   invVol: false,
@@ -113,9 +112,8 @@ export function validate(f: FormValues, s: SettingsValues): { input: StrategyInp
   for (const x of f.sleeves) {
     const tag = f.sleeves.length > 1 ? `Sleeve "${x.id}": ` : ''
     if (x.universe.length === 0) errors.push(`${tag}pick at least one asset to choose from.`)
-    const lb = parseLookbacks(x.lookbacks)
-    if (lb.length === 0 || lb.some((n) => !Number.isInteger(n) || n < 1 || n > 12))
-      errors.push(`${tag}lookback must be whole months between 1 and 12 (for example 12, or 3, 6, 12).`)
+    if (x.lookbacks.length === 0 || x.lookbacks.some((n) => !Number.isInteger(n) || n < 1 || n > 12))
+      errors.push(`${tag}lookback must be whole months between 1 and 12.`)
     if (x.topN > x.universe.length && x.universe.length > 0) errors.push(`${tag}you can't hold ${x.topN} assets when you only picked ${x.universe.length}.`)
     if (x.buffer > 0 && x.topN !== 1) errors.push(`${tag}the switch buffer only works when holding a single asset.`)
     if (x.universe.includes(x.safeAsset)) errors.push(`${tag}the safe haven (${x.safeAsset}) is also in the list to choose from.`)

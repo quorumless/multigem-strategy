@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Controller, useFieldArray, useWatch, type UseFormReturn } from 'react-hook-form'
 import { parseConfig, StrategySchema, type StrategyInput } from 'engine'
-import { Check, Plus, Trash2 } from 'lucide-react'
+import { Check, Minus, Plus, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { presets } from '@/lib/presets'
 import { SAVED_KEY, type Saved } from '@/lib/saved'
@@ -30,6 +30,61 @@ function AssetPicker({ value, onChange, advanced }: { value: string[]; onChange:
           </span>
         </label>
       ))}
+    </div>
+  )
+}
+
+const MAX_LB = 12
+const joinMonths = (v: number[]) => (v.length > 1 ? `${v.slice(0, -1).join(', ')} and ${v[v.length - 1]}` : String(v[0]))
+
+export function LookbackField({ value, onChange }: { value: number[]; onChange: (v: number[]) => void }) {
+  const set = (i: number, n: number) => {
+    if (n < 1 || n > MAX_LB || (n !== value[i] && value.includes(n))) return
+    onChange(value.map((x, j) => (j === i ? n : x)).sort((a, b) => a - b))
+  }
+  const unused = Array.from({ length: MAX_LB }, (_, k) => MAX_LB - k).find((n) => !value.includes(n))
+  return (
+    <div className='space-y-2'>
+      {value.map((n, i) => (
+        <div key={n} role='group' aria-label={`Window ${i + 1}`} className='flex items-center gap-1'>
+          <Button type='button' variant='outline' size='icon' className='size-8' aria-label='Fewer months' disabled={n <= 1} onClick={() => set(i, n - 1)}>
+            <Minus className='size-4' />
+          </Button>
+          <span
+            tabIndex={0}
+            role='spinbutton'
+            aria-valuenow={n}
+            aria-valuemin={1}
+            aria-valuemax={MAX_LB}
+            className='min-w-24 rounded-md px-2 text-center text-sm tabular-nums focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none'
+            onKeyDown={(e) => {
+              if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
+              e.preventDefault()
+              set(i, n + (e.key === 'ArrowUp' ? 1 : -1))
+            }}
+          >
+            {n} {n === 1 ? 'month' : 'months'}
+          </span>
+          <Button type='button' variant='outline' size='icon' className='size-8' aria-label='More months' disabled={n >= MAX_LB} onClick={() => set(i, n + 1)}>
+            <Plus className='size-4' />
+          </Button>
+          {value.length > 1 && (
+            <Button type='button' variant='ghost' size='icon' className='size-8' aria-label='Remove window' onClick={() => onChange(value.filter((_, j) => j !== i))}>
+              <X className='size-4' />
+            </Button>
+          )}
+        </div>
+      ))}
+      {unused !== undefined && (
+        <Button type='button' variant='ghost' size='sm' onClick={() => onChange([...value, unused].sort((a, b) => a - b))}>
+          <Plus className='size-4' /> Add window
+        </Button>
+      )}
+      <p className='max-w-sm text-xs text-muted-foreground'>
+        {value.length > 1
+          ? `Momentum = average of the returns over ${joinMonths(value)} months. Mixing short and long windows reacts faster but trades more.`
+          : `Compare returns over the last ${value[0]} months.`}
+      </p>
     </div>
   )
 }
@@ -153,10 +208,10 @@ export function Builder({
                 <Controller control={form.control} name={`sleeves.${i}.universe`} render={({ field }) => <AssetPicker value={field.value} onChange={field.onChange} advanced={advanced} />} />
               </div>
               <div className='flex flex-wrap gap-6'>
-                <label className='space-y-1'>
+                <div className='space-y-1'>
                   <Labelled k='lookback' />
-                  <Input {...form.register(`sleeves.${i}.lookbacks`)} className='block w-32' placeholder='12 or 3, 6, 12' />
-                </label>
+                  <Controller control={form.control} name={`sleeves.${i}.lookbacks`} render={({ field }) => <LookbackField value={field.value} onChange={field.onChange} />} />
+                </div>
                 <label className='max-w-full space-y-1'>
                   <Labelled k='safeHaven' />
                   <select className={`${selectClass} block`} {...form.register(`sleeves.${i}.safeAsset`)}>

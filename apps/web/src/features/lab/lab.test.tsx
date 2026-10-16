@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { useState } from 'react'
 import { render } from 'vitest-browser-react'
 import { glossary } from '@/lib/glossary'
 import { presets } from '@/lib/presets'
@@ -7,6 +8,7 @@ import { defaultSettings, fromStrategy, validate } from '@/lib/strategy-form'
 import { tradeSentence } from '@/lib/trade-sentence'
 import { parseConfig } from 'engine'
 import { assetLabel } from './assets'
+import { LookbackField } from './builder'
 import { Headline } from './results'
 
 const gcfg = presets[0]!.config
@@ -45,5 +47,32 @@ describe('results', () => {
     const sentences = run.result!.trades.map((t) => tradeSentence(t, run.result!.config, assetLabel))
     expect(sentences.length).toBeGreaterThan(0)
     expect(sentences.some((s) => s.includes('→'))).toBe(true)
+  })
+})
+
+describe('lookback stepper', () => {
+  const Harness = ({ start }: { start: number[] }) => {
+    const [v, setV] = useState(start)
+    return <LookbackField value={v} onChange={setV} />
+  }
+
+  it('increments, clamps at 12 and adds/removes windows', async () => {
+    const { getByText, getByRole } = await render(<Harness start={[11]} />)
+    await expect.element(getByText('11 months', { exact: true })).toBeInTheDocument()
+    await getByRole('button', { name: 'More months' }).click()
+    await expect.element(getByText('12 months', { exact: true })).toBeInTheDocument()
+    await expect.element(getByRole('button', { name: 'More months' })).toBeDisabled()
+    await getByRole('button', { name: 'Add window' }).click()
+    await expect.element(getByText('11 months', { exact: true })).toBeInTheDocument()
+    await expect.element(getByText(/average of the returns over 11 and 12 months/)).toBeInTheDocument()
+  })
+
+  it('shows the MultiGEM preset as 4 windows', async () => {
+    const multi = presets.find((p) => p.config.name === 'MultiGEM')!
+    const lookbacks = fromStrategy(parseConfig(multi.config)).form.sleeves[0]!.lookbacks
+    const { getByRole } = await render(<Harness start={lookbacks} />)
+    expect(lookbacks).toEqual([3, 6, 9, 12])
+    await expect.element(getByRole('group').first()).toBeInTheDocument()
+    expect(document.querySelectorAll('[role=spinbutton]').length).toBe(4)
   })
 })
