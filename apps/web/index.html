@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-scheme="default">
   <head>
     <meta charset="UTF-8" />
     <link
@@ -61,6 +61,10 @@
     />
 
     <meta name="theme-color" content="#fff" />
+<script>
+// Apply the saved color scheme before first paint (no flash). Keep in sync with src/lib/scheme.ts.
+try { var s = localStorage.getItem('multigem.scheme'); if (s && /^[a-z-]+$/.test(s)) document.documentElement.dataset.scheme = s } catch (e) {}
+</script>
   </head>
 
   <body>

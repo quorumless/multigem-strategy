@@ -1,10 +1,10 @@
 import type { Entry } from '@/lib/compare'
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { money } from '@/lib/format'
+import { BENCH_COLOR, CAT } from '@/lib/chart-colors'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { START_AMOUNT } from '@/features/lab/results'
 
-const COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)']
 const tick = { fontSize: 11 }
 
 export default function CompareCharts({ results }: { results: Entry[] }) {
@@ -28,7 +28,7 @@ export default function CompareCharts({ results }: { results: Entry[] }) {
             <YAxis tick={tick} tickFormatter={tickFmt} width={45} />
             <Tooltip formatter={(v) => fmt(Number(v))} />
             <Legend />
-            {results.map((r, i) => <Line key={r.name} dataKey={r.name} stroke={COLORS[i]} dot={false} strokeWidth={r.isBenchmark ? 1.5 : 2} strokeDasharray={r.isBenchmark ? '5 3' : undefined} />)}
+            {results.map((r, i) => <Line key={r.name} dataKey={r.name} stroke={r.isBenchmark ? BENCH_COLOR.BH_US : CAT[i % CAT.length]} dot={false} strokeWidth={r.isBenchmark ? 1.5 : 2} strokeDasharray={r.isBenchmark ? '5 3' : undefined} />)}
           </LineChart>
         </ResponsiveContainer>
       </CardContent>

@@ -11,7 +11,7 @@ export function GrowthChart({ rows, log }: { rows: { date: string; value: number
         <XAxis dataKey='date' tick={tick} minTickGap={40} />
         <YAxis scale={log ? 'log' : 'auto'} domain={log ? ['auto', 'auto'] : [0, 'auto']} tick={tick} width={50} allowDataOverflow tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} />
         <Tooltip formatter={(v) => Math.round(Number(v)).toLocaleString('en-US')} />
-        <Line dataKey='value' stroke='var(--chart-1)' dot={false} strokeWidth={2} isAnimationActive={false} />
+        <Line dataKey='value' stroke='var(--chart-strategy)' dot={false} strokeWidth={2} isAnimationActive={false} />
       </LineChart>
     </ResponsiveContainer>
   )

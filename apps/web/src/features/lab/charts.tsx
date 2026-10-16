@@ -2,14 +2,16 @@ import { useState } from 'react'
 import type { BacktestResult } from 'engine'
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { fullYears, heatmapRows } from '@/lib/chart-data'
+import { BENCH_COLOR, CAT, STRATEGY, diverging } from '@/lib/chart-colors'
 import { MONTH_ABBR, money, pct } from '@/lib/format'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
-import { assetLabel } from './assets'
+import { assetLabel, holdableAssets } from './assets'
 import { START_AMOUNT } from './results'
 
-const COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)']
 const BENCH: Record<string, string> = { BH_US: 'US stocks only', '6040': '60/40 US stocks/bonds', EW: 'Equal mix of your assets' }
+// An asset keeps its color whatever else is held (color follows entity).
+const assetColor = (id: string) => CAT[Math.max(0, holdableAssets.findIndex((a) => a.id === id)) % CAT.length]
 const tick = { fontSize: 11 }
 
 function Panel({ title, note, action, children }: { title: string; note?: string; action?: React.ReactNode; children: React.ReactNode }) {
@@ -56,8 +58,8 @@ export default function Charts({ result }: { result: BacktestResult }) {
             <YAxis scale={log ? 'log' : 'auto'} domain={log ? ['auto', 'auto'] : [0, 'auto']} tick={tick} tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} width={45} allowDataOverflow />
             <Tooltip formatter={(v) => money(Number(v), ccy)} />
             <Legend />
-            <Line dataKey='Strategy' stroke={COLORS[0]} dot={false} strokeWidth={2} />
-            {benchIds.map((b, i) => <Line key={b} dataKey={BENCH[b]!} stroke={COLORS[i + 1]} dot={false} strokeWidth={1} />)}
+            <Line dataKey='Strategy' stroke={STRATEGY} dot={false} strokeWidth={2} />
+            {benchIds.map((b) => <Line key={b} dataKey={BENCH[b]!} stroke={BENCH_COLOR[b]} dot={false} strokeWidth={1.5} strokeDasharray='5 3' />)}
           </LineChart>
         </ResponsiveContainer>
       </Panel>
@@ -69,7 +71,7 @@ export default function Charts({ result }: { result: BacktestResult }) {
             {x}
             <YAxis tick={tick} tickFormatter={(v: number) => `${v}%`} width={45} />
             <Tooltip formatter={(v) => `${Number(v).toFixed(1)}%`} />
-            <Area dataKey='drawdown' name='Fall' stroke={COLORS[0]} fill={COLORS[0]} fillOpacity={0.3} />
+            <Area dataKey='drawdown' name='Fall' stroke={STRATEGY} fill={STRATEGY} fillOpacity={0.3} />
           </AreaChart>
         </ResponsiveContainer>
       </Panel>
@@ -82,8 +84,8 @@ export default function Charts({ result }: { result: BacktestResult }) {
             <YAxis tick={tick} tickFormatter={(v: number) => `${v}%`} width={45} />
             <Tooltip formatter={(v) => `${Number(v).toFixed(1)}%`} />
             <Legend />
-            <Bar dataKey='Strategy' fill={COLORS[0]} />
-            <Bar dataKey='US stocks only' fill={COLORS[1]} />
+            <Bar dataKey='Strategy' fill={STRATEGY} />
+            <Bar dataKey='US stocks only' fill={BENCH_COLOR.BH_US} />
           </BarChart>
         </ResponsiveContainer>
       </Panel>
@@ -96,7 +98,7 @@ export default function Charts({ result }: { result: BacktestResult }) {
             <YAxis tick={tick} tickFormatter={(v: number) => `${v}%`} width={45} domain={[0, 100]} />
             <Tooltip formatter={(v) => `${Number(v).toFixed(0)}%`} />
             <Legend />
-            {assetIds.map((a, i) => <Area key={a} dataKey={a} name={assetLabel(a)} stackId='1' stroke={COLORS[i % 5]} fill={COLORS[i % 5]} fillOpacity={0.7} />)}
+            {assetIds.map((a) => <Area key={a} dataKey={a} name={assetLabel(a)} stackId='1' stroke={assetColor(a)} fill={assetColor(a)} fillOpacity={0.8} />)}
           </AreaChart>
         </ResponsiveContainer>
       </Panel>
@@ -121,7 +123,7 @@ export default function Charts({ result }: { result: BacktestResult }) {
                     <td
                       key={m}
                       title={r == null ? undefined : pct(r)}
-                      style={r == null ? undefined : { background: `${r >= 0 ? 'rgb(34 197 94' : 'rgb(239 68 68'} / ${Math.min(Math.abs(r) / 0.08, 1) * 0.85})` }}
+                      style={r == null ? undefined : { background: diverging((r / 0.08) * 0.6) }}
                       className='rounded-sm py-1'
                     >
                       {r == null ? '' : (r * 100).toFixed(1)}

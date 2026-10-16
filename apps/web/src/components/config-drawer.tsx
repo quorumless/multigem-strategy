@@ -1,4 +1,4 @@
-import { type SVGProps } from 'react'
+import { type SVGProps, useState } from 'react'
 import { Root as Radio, Item } from '@radix-ui/react-radio-group'
 import { CircleCheck, RotateCcw, Settings } from 'lucide-react'
 import { IconDir } from '@/assets/custom/icon-dir'
@@ -12,6 +12,7 @@ import { IconThemeDark } from '@/assets/custom/icon-theme-dark'
 import { IconThemeLight } from '@/assets/custom/icon-theme-light'
 import { IconThemeSystem } from '@/assets/custom/icon-theme-system'
 import { cn } from '@/lib/utils'
+import { SCHEMES, getScheme, setScheme } from '@/lib/scheme'
 import { useDirection } from '@/context/direction-provider'
 import { type Collapsible, useLayout } from '@/context/layout-provider'
 import { useTheme } from '@/context/theme-provider'
@@ -37,6 +38,7 @@ export function ConfigDrawer() {
     setOpen(true)
     resetDir()
     resetTheme()
+    setScheme('default')
     resetLayout()
   }
 
@@ -61,6 +63,7 @@ export function ConfigDrawer() {
         </SheetHeader>
         <div className='space-y-6 overflow-y-auto px-4'>
           <ThemeConfig />
+          <SchemeConfig />
           <SidebarConfig />
           <LayoutConfig />
           <DirConfig />
@@ -169,6 +172,29 @@ function RadioGroupItem({
         {item.label}
       </div>
     </Item>
+  )
+}
+
+function SchemeConfig() {
+  const [scheme, set] = useState(getScheme)
+  return (
+    <div>
+      <SectionTitle
+        title='Color scheme'
+        showReset={scheme !== 'default'}
+        onReset={() => { setScheme('default'); set('default') }}
+        resetAriaLabel='Reset color scheme to default'
+      />
+      <select
+        aria-label='Color scheme'
+        value={scheme}
+        onChange={(e) => { setScheme(e.target.value); set(e.target.value) }}
+        className='w-full max-w-md rounded-md border bg-background px-3 py-2 text-sm'
+      >
+        {SCHEMES.map((x) => <option key={x.id} value={x.id}>{x.label}</option>)}
+      </select>
+      <p className='mt-1 text-xs text-muted-foreground'>Each scheme has a light and a dark variant, picked by the theme above.</p>
+    </div>
   )
 }
 

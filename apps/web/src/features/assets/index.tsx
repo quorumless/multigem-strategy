@@ -7,6 +7,7 @@ import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { diverging } from '@/lib/chart-colors'
 import { num } from '@/lib/format'
 
 const GrowthChart = lazy(() => import('./charts').then((m) => ({ default: m.GrowthChart })))
@@ -49,8 +50,8 @@ function growthRows(id: string) {
   return data.dates.flatMap((date, i) => (col[i] != null ? [{ date, value: (col[i]! / base) * 10_000 }] : []))
 }
 
-/** Background for a correlation cell: blue = together, red = opposite. */
-const cellColor = (v: number | null) => (v == null ? undefined : `color-mix(in oklab, ${v >= 0 ? '#3b82f6' : '#ef4444'} ${Math.round(Math.abs(v) * 70)}%, transparent)`)
+/** Background for a correlation cell: teal = together, orange-red = opposite. */
+const cellColor = (v: number | null) => (v == null ? undefined : diverging(v * 0.8))
 
 export function CorrelationGrid({ ids, from }: { ids: string[]; from?: string }) {
   const { matrix, months } = useMemo(() => correlationMatrix(data, ids, { from }), [ids, from])
