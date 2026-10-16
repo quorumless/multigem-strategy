@@ -1,8 +1,8 @@
 import { lazy, Suspense, useMemo, useState } from 'react'
-import { type BacktestResult } from 'engine'
+import { Info } from 'lucide-react'
 import { data } from '@/data/source'
 import { errorMessage } from '@/lib/run'
-import { bestIndexes, compareRuns, summarySentence } from '@/lib/compare'
+import { bestIndexes, compareRuns, summarySentence, toEntries, type Entry } from '@/lib/compare'
 import { money, monthName, num, pct } from '@/lib/format'
 import { betterWhen, glossary } from '@/lib/glossary'
 import { listStrategies } from '@/lib/saved'
@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { PageShell } from '@/components/page-shell'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { InfoTip } from '@/features/lab/info-tip'
 import { START_AMOUNT } from '@/features/lab/results'
@@ -23,20 +24,20 @@ interface Row {
   /** Glossary key for the ⓘ tooltip. */
   k: string
   better: 'higher' | 'lower'
-  get: (r: BacktestResult) => number | null
-  fmt: (v: number, r: BacktestResult) => string
+  get: (r: Entry) => number | null
+  fmt: (v: number, r: Entry) => string
 }
 
 const metric = (k: keyof typeof betterWhen, fmt: Row['fmt']): Row => ({
   k,
   label: glossary[k]!.label,
   better: betterWhen[k],
-  get: (r) => r.metrics[k] as number | null,
+  get: (r) => r.run.metrics[k] as number | null,
   fmt,
 })
 
 const rows: Row[] = [
-  { k: 'totalReturn', label: 'Final value', better: 'higher', get: (r) => r.series.at(-1)!.value * START_AMOUNT, fmt: (v, r) => money(v, r.config.settings.currency) },
+  { k: 'totalReturn', label: 'Final value', better: 'higher', get: (r) => r.run.series.at(-1)!.value * START_AMOUNT, fmt: (v, r) => money(v, r.currency) },
   metric('cagr', (v) => pct(v)),
   metric('maxDrawdown', (v) => pct(v, 0)),
   metric('maxDrawdownRecoveryMonths', (v) => `${v} months`),
@@ -46,17 +47,33 @@ const rows: Row[] = [
   metric('calmar', (v) => num(v)),
   metric('ulcer', (v) => num(v * 100, 1)),
   metric('switchesPerYear', (v) => num(v, 1)),
-  { k: 'cagr', label: 'Years behind US stocks', better: 'lower', get: (r) => r.relative?.yearsBehind ?? null, fmt: (v, r) => `${v} of ${r.relative?.fullYears}` },
+  { k: 'cagr', label: 'Years behind US stocks', better: 'lower', get: (r) => r.behind?.yearsBehind ?? null, fmt: (v, r) => `${v} of ${r.behind?.fullYears}` },
 ]
 
-export function MetricsTable({ results }: { results: BacktestResult[] }) {
+export function MetricsTable({ results }: { results: Entry[] }) {
   return (
     <div className='overflow-x-auto'>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead />
-            {results.map((r) => <TableHead key={r.config.name}>{r.config.name}</TableHead>)}
+            {results.map((r) => (
+              <TableHead key={r.name}>
+                {r.name}
+                {r.isBenchmark && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type='button' aria-label='About the S&P 500 benchmark' className='ms-1 inline-flex align-middle text-muted-foreground hover:text-foreground'>
+                        <Info className='size-3.5' />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent className='max-w-xs'>
+                      Simply buying US stocks and never selling: same currency and fees as your strategies. It pays no tax here because nothing is sold, but the tax is only postponed: you would owe it when you eventually sell, so its after-tax result is flattered compared with a strategy that trades.
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </TableHead>
+            ))}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -69,7 +86,7 @@ export function MetricsTable({ results }: { results: BacktestResult[] }) {
                   {row.label} <InfoTip k={row.k} />
                 </TableCell>
                 {results.map((r, i) => (
-                  <TableCell key={r.config.name} data-best={best.has(i)} className={best.has(i) ? 'bg-green-500/15 font-semibold' : undefined}>
+                  <TableCell key={r.name} data-best={best.has(i)} className={best.has(i) ? 'bg-green-500/15 font-semibold' : undefined}>
                     {vals[i] == null ? '–' : row.fmt(vals[i], r)}
                   </TableCell>
                 ))}
@@ -85,23 +102,29 @@ export function MetricsTable({ results }: { results: BacktestResult[] }) {
 export function Compare() {
   const [options] = useState(listStrategies)
   const [picked, setPicked] = useState<string[]>(() => options.filter((o) => o.source === 'preset').slice(0, 2).map((o) => o.id))
+  const [withSp, setWithSp] = useState(true)
   const out = useMemo(() => {
-    if (picked.length < 2) return null
+    if (picked.length < (withSp ? 1 : 2)) return null
     try {
-      return compareRuns(options.filter((o) => picked.includes(o.id)).map((o) => o.config), data)
+      const r = compareRuns(options.filter((o) => picked.includes(o.id)).map((o) => o.config), data)
+      return { ...r, entries: toEntries(r.results, withSp) }
     } catch (e) {
       return { error: errorMessage(e) }
     }
-  }, [picked, options])
+  }, [picked, options, withSp])
 
   return (
     <PageShell title='Compare strategies'>
       <Card>
         <CardHeader>
-          <CardTitle>Pick 2 to {MAX} strategies</CardTitle>
+          <CardTitle>Pick up to {MAX} strategies</CardTitle>
           <CardDescription>Your saved strategies and the ready-made ones. Costs, tax and currency come from the Settings you chose on the main page.</CardDescription>
         </CardHeader>
         <CardContent className='grid gap-2 sm:grid-cols-2 xl:grid-cols-3'>
+          <label className='flex items-center gap-2 text-sm'>
+            <Checkbox checked={withSp} onCheckedChange={(c) => setWithSp(c === true)} />
+            S&P 500 (buy & hold) <span className='text-xs text-muted-foreground'>(for comparison)</span>
+          </label>
           {options.map((o) => (
             <label key={o.id} className='flex items-center gap-2 text-sm'>
               <Checkbox
@@ -120,7 +143,7 @@ export function Compare() {
           {storageAvailable() ? "You haven't saved any strategies yet. Build one on the Dashboard and press Save to compare it here." : "Saving isn't available in this browser (private mode?), so only the ready-made strategies are listed."}
         </p>
       )}
-      {!out && <p className='text-sm text-muted-foreground'>Pick at least two strategies to compare.</p>}
+      {!out && <p className='text-sm text-muted-foreground'>Pick a strategy and the S&P 500, or at least two strategies, to compare.</p>}
       {out && 'error' in out && (
         <Alert variant='destructive'>
           <AlertDescription>{out.error}</AlertDescription>
@@ -134,15 +157,15 @@ export function Compare() {
               {monthName(out.range.start)} to {monthName(out.range.end)}.
             </AlertDescription>
           </Alert>
-          <p className='text-lg font-medium'>{summarySentence(out.results)}</p>
+          <p className='text-lg font-medium'>{summarySentence(out.entries)}</p>
           <Card>
             <CardContent className='pt-6'>
-              <MetricsTable results={out.results} />
+              <MetricsTable results={out.entries} />
               <p className='mt-2 text-xs text-muted-foreground'>Green marks the best value in each row.</p>
             </CardContent>
           </Card>
           <Suspense fallback={<p className='text-sm text-muted-foreground'>Loading charts…</p>}>
-            <CompareCharts results={out.results} />
+            <CompareCharts results={out.entries} />
           </Suspense>
         </>
       )}
