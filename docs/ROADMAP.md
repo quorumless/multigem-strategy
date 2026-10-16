@@ -12,9 +12,9 @@ Each task is sized for one agent session. Work top to bottom; a milestone is don
       --with-deps` before `pnpm test`. Engine tests stay plain Node Vitest.
 - [x] `data/pipeline` uv project skeleton.
 - [x] GitHub Actions: install, typecheck, lint, `pnpm test`.
-- Note: all checks pass locally; CI not yet run (no GitHub remote). Route group `_authenticated`
+- Note: all checks pass locally; first CI run passed (run 38923324430, js 1m21s, pipeline 11s). Route group `_authenticated`
   renamed to `_app`; react-query/axios/date libs dropped from the fork (unused).
-- Done when: `pnpm install && pnpm test && pnpm --filter web build` pass in CI; app shows an
+- Done when: `pnpm install && pnpm test && pnpm --filter web build` pass in CI (met, run 38923324430); app shows an
   empty dashboard shell.
 
 ## M1 — Data pipeline (Python)

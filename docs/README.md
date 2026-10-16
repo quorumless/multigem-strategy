@@ -8,7 +8,9 @@ change them. Repo-wide rules live in `../CLAUDE.md`.
 - M10 (What to hold now) is approved and not started.
 - Last code commits: `d37dcd0` (rolling start, correlation), `e01d832` (M6–M8 pages), `33be47c` (M9 explainer, empty/error states).
 - Verified: web export == CLI for a rolling 10y classic GEM run (4.15–17.36% CLI, 4.2–17.4% web); recompute ≈27 ms.
-- CI has never run (no GitHub remote).
+- Published: https://github.com/quorumless/multigem-strategy (public, MIT, one squashed commit of tree `8e021f7`, no market data).
+- CI: first run 38923324430 passed (js 1m21s, pipeline 11s). Non-blocking warnings: actions pinned at v4/v6 run on deprecated Node 20; `ubuntu-latest` moves to Ubuntu 26 on 2026-10-19.
+- The local repo is the private working copy with full history; it has no remote.
 
 Owner decisions (2026-10-16):
 - Accepted: `VALIDATION.md` (M4) and the M1 sanity report. Both are regenerated after the data change.
@@ -18,7 +20,6 @@ Owner decisions (2026-10-16):
 - Approved for v1: "What to hold now" (PRD F9, M10, STRATEGY_SPEC §11).
 - Licensing (owner): the public repo ships without data. `data/processed/` is local only and gitignored;
   `data/sample/` is committed synthetic data for tests, CI and demo mode. No public deploy with real data (PRD §8.3).
-- Open: git history still contains `data/processed/`. Owner is deciding how to handle it before publishing.
 
 ## Getting the data
 Real market data is not in the repo. Build it locally:
