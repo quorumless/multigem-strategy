@@ -21,15 +21,15 @@ export function SettingsPanel({ value, onChange }: { value: SettingsValues; onCh
     <section className='space-y-3 border-t pt-5'>
       <div>
         <h2 className='font-semibold'>Costs &amp; tax</h2>
-        <p className='text-sm text-muted-foreground'>Defaults are for a Polish investor. Results are always shown after these.</p>
+        <p className='text-sm text-muted-foreground'>Defaults: US dollars, 0.1% trading cost, 19% tax on gains (Polish rate). Results are always shown after these.</p>
       </div>
       <div className='flex flex-wrap items-end gap-x-6 gap-y-4'>
         <label className='space-y-1'>
           <Labelled k='currency' />
           <select className={`${selectClass} block`} value={value.currency} onChange={(e) => set('currency', e.target.value as SettingsValues['currency'])}>
+            <option>USD</option>
             <option>PLN</option>
             <option>EUR</option>
-            <option>USD</option>
           </select>
         </label>
         <label className='space-y-1'>

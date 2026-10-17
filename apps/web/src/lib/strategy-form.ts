@@ -36,7 +36,7 @@ export interface SettingsValues {
 }
 
 /** Realistic web defaults (PRD U5); engine defaults are unchanged. */
-export const defaultSettings: SettingsValues = { currency: 'PLN', costPct: 0.1, fxCostPct: 0.2, taxOn: true, taxRate: 19 }
+export const defaultSettings: SettingsValues = { currency: 'USD', costPct: 0.1, fxCostPct: 0.2, taxOn: true, taxRate: 19 }
 
 const r6 = (x: number) => Math.round(x * 1e6) / 1e6
 
