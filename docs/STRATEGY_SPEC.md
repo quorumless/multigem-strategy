@@ -129,7 +129,8 @@ Conventions (decided by owner, M2):
 - A move from an empty holding (cash during the execution lag) to the first asset is not a switch.
 - Relative (`relative`, vs BH_US; null with a warning if BH_US is missing):
   - `fullYears`: full calendar years used.
-  - `yearsBehind`: full calendar years in which the strategy's return < BH_US's return.
+  - `yearsBehind`: full calendar years in which the strategy's return < BH_US's return. Ties within 1e-9
+    don't count (float noise).
   - `longestBehindMonths`, with `start` and `end`: the longest stretch of the ratio
     V_strategy / V_BH_US below its running peak. The stretch starts at the ratio's peak date;
     months = recovery index − peak index; `end` is null if not recovered.

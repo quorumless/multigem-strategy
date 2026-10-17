@@ -130,9 +130,15 @@ US–ex-US equities 0.8–0.9 · AGG–LTT 0.8–0.9 · LTT–equities negative 
 2000 and since 2022.
 
 ## Refresh procedure
-`cd data/pipeline && uv run python -m pipeline.build` → review the diff of `data/processed/`,
-`sanity.md` and the gate table → `pnpm test` (snapshot tests flag changed history). Update snapshots
-only for appended months or documented source fixes.
+- Normal build: `cd data/pipeline && uv run python -m pipeline.build`. Uses cached raw downloads.
+- Monthly refresh: `pnpm data:refresh` (= `cd data/pipeline && uv run python -m pipeline.build --refresh`).
+  `--refresh` re-downloads all sources. Before this flag, Yahoo and FRED raw caches were never refetched,
+  so a rebuild could take a mid-month price as month-end.
+- Outputs are written atomically. The run ends with a line `RESULT {"lastMonth","previousLastMonth"}`.
+- Then review the diff of `data/processed/`, `sanity.md` and the gate table, and run `pnpm test`
+  (snapshot tests flag changed history). Update snapshots only for appended months or documented source fixes.
+- Web: the Assets & data page has a dev-only "Refresh data" button (POST `/__data/refresh` on the Vite dev
+  server, same-origin only). It is not in the static build.
 
 ## Open questions (OWNER)
 Resolved (owner, data v2): the Ken French back-fill is rejected (PRD §8.12). DEVXUS and EM start
