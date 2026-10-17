@@ -1,4 +1,3 @@
-import { useLayout } from '@/context/layout-provider'
 import {
   Sidebar,
   SidebarContent,
@@ -10,9 +9,8 @@ import { sidebarData } from './data/sidebar-data'
 import { NavGroup } from './nav-group'
 
 export function AppSidebar() {
-  const { collapsible, variant } = useLayout()
   return (
-    <Sidebar collapsible={collapsible} variant={variant}>
+    <Sidebar collapsible='icon' variant='inset'>
       <SidebarHeader>
         <AppTitle />
       </SidebarHeader>

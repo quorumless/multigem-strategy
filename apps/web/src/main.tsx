@@ -1,7 +1,6 @@
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 import { ThemeProvider } from './context/theme-provider'
 // Generated Routes
@@ -28,9 +27,7 @@ if (!rootElement.innerHTML) {
     <StrictMode>
       <ThemeProvider>
         <FontProvider>
-          <DirectionProvider>
-            <RouterProvider router={router} />
-          </DirectionProvider>
+          <RouterProvider router={router} />
         </FontProvider>
       </ThemeProvider>
     </StrictMode>
