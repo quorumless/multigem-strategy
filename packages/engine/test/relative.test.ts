@@ -46,3 +46,10 @@ test('relative: never behind', () => {
     longestBehindEnd: null,
   })
 })
+
+test('relative: a tie up to float noise is not a year behind', () => {
+  // 2000: benchmark ends 2e-16 above the strategy (float noise), 2001 flat for both
+  const v = dates.map((_, i) => (i >= 12 ? 1.43 : 1))
+  const b = dates.map((_, i) => (i >= 12 ? 1.3 * 1.1 : 1)) // 1.4300000000000002
+  expect(computeRelative({ dates, values: v, benchValues: b }).yearsBehind).toBe(0)
+})

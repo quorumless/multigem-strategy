@@ -201,7 +201,8 @@ export function computeRelative({ dates, values, benchValues }: RelativeInput): 
   const s = fullYearReturns(dates, values)
   const b = fullYearReturns(dates, benchValues)
   let yearsBehind = 0
-  for (const [y, r] of s) if (r < b.get(y)!) yearsBehind++
+  // ponytail: 1e-9 absorbs float noise when both held the same asset all year (a tie is not "behind")
+  for (const [y, r] of s) if (r < b.get(y)! - 1e-9) yearsBehind++
 
   // Relative drawdown stretches of q = strategy/benchmark: from a running peak until q regains it.
   const q = values.map((v, i) => v / benchValues[i]!)

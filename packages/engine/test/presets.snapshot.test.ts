@@ -15,14 +15,15 @@ const r6 = (x: number | null) => (x === null ? null : Math.round(x * 1e6) / 1e6)
 
 const expected = {
   'classic-gem': { range: { start: '1997-04', end: '2026-09' }, cagr: 0.106216, maxDrawdown: -0.225992, sharpe: 0.682191, switchesPerYear: 1.25779, yearsBehind: 16, fullYears: 28 },
-  'gem-em': { range: { start: '1998-01', end: '2026-09' }, cagr: 0.103941, maxDrawdown: -0.301719, sharpe: 0.583777, switchesPerYear: 1.988372, yearsBehind: 14, fullYears: 27 },
-  multigem: { range: { start: '2003-07', end: '2026-09' }, cagr: 0.114153, maxDrawdown: -0.193539, sharpe: 0.856805, switchesPerYear: 9.107914, yearsBehind: 12, fullYears: 22 },
+  'gem-em': { range: { start: '1998-01', end: '2026-09' }, cagr: 0.103941, maxDrawdown: -0.301719, sharpe: 0.583777, switchesPerYear: 1.988372, yearsBehind: 13, fullYears: 27 },
+  multigem: { range: { start: '2003-07', end: '2026-09' }, cagr: 0.114153, maxDrawdown: -0.193539, sharpe: 0.856806, switchesPerYear: 9.107914, yearsBehind: 12, fullYears: 22 },
   multisleeve: { range: { start: '2003-07', end: '2026-09' }, cagr: 0.103645, maxDrawdown: -0.165905, sharpe: 0.878184, switchesPerYear: 9.582734, yearsBehind: 14, fullYears: 22 },
 }
 
 for (const [name, exp] of Object.entries(expected)) {
   test.skipIf(missing)(`preset snapshot: ${name}`, () => {
-    const r = backtest(JSON.parse(readFileSync(new URL(`presets/${name}.json`, root), 'utf8')), data!)
+    // pinned end month, so a monthly data refresh adds rows without breaking the snapshot
+    const r = backtest({ ...JSON.parse(readFileSync(new URL(`presets/${name}.json`, root), 'utf8')), endDate: '2026-09' }, data!)
     const m = r.metrics
     expect({
       range: r.range,
