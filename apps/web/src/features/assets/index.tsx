@@ -6,9 +6,11 @@ import { Badge } from '@/components/ui/badge'
 import { PageShell } from '@/components/page-shell'
 import { ScaleToggle } from '@/lib/chart-parts'
 import { selectClass } from '@/features/lab/info-tip'
-import { TriangleAlert } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { RefreshCw, TriangleAlert } from 'lucide-react'
+import { toast } from 'sonner'
 import { diverging } from '@/lib/chart-colors'
-import { num } from '@/lib/format'
+import { monthName, num } from '@/lib/format'
 
 const GrowthChart = lazy(() => import('./charts').then((m) => ({ default: m.GrowthChart })))
 const RollingChart = lazy(() => import('./charts').then((m) => ({ default: m.RollingChart })))
@@ -123,6 +125,46 @@ function AssetCard({ a, selected, onSelect }: { a: AssetInfo; selected: boolean;
   )
 }
 
+/** Dev-server only: the endpoint exists in `vite dev`, and this whole component is dead-code-eliminated from the build. */
+function RefreshData() {
+  const [busy, setBusy] = useState(false)
+  const [log, setLog] = useState('')
+  const last = data.dates.at(-1)
+  const run = async () => {
+    setBusy(true)
+    setLog('')
+    try {
+      const r = await fetch('/__data/refresh', { method: 'POST' })
+      const j = await r.json()
+      setLog(j.log ?? '')
+      if (!j.ok) return void toast.error(r.status === 409 ? 'A refresh is already running.' : 'Data refresh failed. See the log below.')
+      if (j.restart) return void toast.success('Data built. Restart `pnpm --filter web dev` to use it.')
+      if (j.lastMonth === j.previousLastMonth) return void toast.success(`Already up to date (${monthName(j.lastMonth)})`)
+      toast.success(`Data updated through ${monthName(j.lastMonth)}`)
+      // Vite hot-reloads the data modules; reload as a fallback so every page picks up the new month.
+      setTimeout(() => location.reload(), 3000)
+    } catch {
+      toast.error('Could not reach the dev server.')
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <Card>
+      <CardContent className='space-y-2 text-sm'>
+        <div className='flex flex-wrap items-center gap-3'>
+          <Button size='sm' onClick={run} disabled={busy}>
+            <RefreshCw className={busy ? 'animate-spin' : ''} aria-hidden /> Refresh data
+          </Button>
+          <span className='text-muted-foreground'>Data through {last ? monthName(last) : '–'}</span>
+        </div>
+        <p className='text-xs text-muted-foreground'>Downloads the latest month from all sources and rebuilds the data (about a minute). Local only.</p>
+        {log && <details><summary className='cursor-pointer text-xs text-muted-foreground'>Log</summary><pre className='mt-1 max-h-64 overflow-auto rounded-md bg-muted p-2 text-xs'>{log}</pre></details>}
+      </CardContent>
+    </Card>
+  )
+}
+
 export function AssetsPage() {
   return (
     <PageShell title='Assets & data' lede='What each building block is, how it has grown, and how closely the assets move together.'>
@@ -147,6 +189,7 @@ export function AssetsContent() {
   )
   return (
     <div className='space-y-4'>
+        {import.meta.env.DEV && <RefreshData />}
         <div className='grid gap-3 md:grid-cols-2 xl:grid-cols-3'>
           {assetsOnly.map((a) => <AssetCard key={a.id} a={a} selected={a.id === sel} onSelect={() => setSel(a.id)} />)}
         </div>

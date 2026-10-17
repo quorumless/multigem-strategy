@@ -8,6 +8,7 @@
     "test": "pnpm -r --if-present test",
     "typecheck": "pnpm -r --if-present typecheck",
     "lint": "pnpm -r --if-present lint",
-    "backtest": "pnpm --filter engine backtest"
+    "backtest": "pnpm --filter engine backtest",
+    "data:refresh": "cd data/pipeline && uv run python -m pipeline.build --refresh"
   }
 }

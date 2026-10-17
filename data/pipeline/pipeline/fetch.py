@@ -10,6 +10,7 @@ import pandas as pd
 import requests
 
 RAW = Path(__file__).resolve().parents[2] / "raw"
+REFRESH = False  # set by build --refresh: re-download every source
 UA = {"User-Agent": "Mozilla/5.0"}
 MSCI_URL = (
     "https://app2.msci.com/products/service/index/indexmaster/getLevelDataForGraph"
@@ -20,7 +21,7 @@ NBP_URL = "https://api.nbp.pl/api/exchangerates/rates/a/usd/{a}/{b}/?format=json
 
 def _cached(name: str, fetch, refresh: bool) -> str:
     p = RAW / name
-    if refresh or not p.exists():
+    if refresh or REFRESH or not p.exists():
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(fetch())
     return p.read_text()

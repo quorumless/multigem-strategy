@@ -3,6 +3,7 @@
 import argparse
 import datetime as dt
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -312,7 +313,14 @@ def main() -> None:
         default=(pd.Period(dt.date.today(), "M") - 1).strftime("%Y-%m"),
         help="last complete month, YYYY-MM (default: previous calendar month)",
     )
-    through = ap.parse_args().through
+    ap.add_argument(
+        "--refresh",
+        action="store_true",
+        help="re-download all sources instead of using data/raw caches",
+    )
+    args = ap.parse_args()
+    through = args.through
+    fetch.REFRESH = args.refresh
 
     cols, assets, splices, outl = {}, [], {}, {}
     for a in ASSETS:
@@ -344,7 +352,15 @@ def main() -> None:
     df.index = df.index.strftime("%Y-%m")
     df.index.name = "date"
     OUT.mkdir(parents=True, exist_ok=True)
-    df.to_csv(OUT / "monthly.csv", float_format="%.6f")
+    prev_csv = OUT / "monthly.csv"
+    prev_last = (
+        pd.read_csv(prev_csv, usecols=["date"])["date"].iloc[-1]
+        if prev_csv.exists()
+        else None
+    )
+    # write to temp files, os.replace all three only once everything is produced
+    tmp = {n: OUT / f".{n}.tmp" for n in ("monthly.csv", "assets.json", "sanity.md")}
+    df.to_csv(tmp["monthly.csv"], float_format="%.6f")
 
     out_assets = []
     for a in assets + [
@@ -383,7 +399,7 @@ def main() -> None:
                 ),
             }
         )
-    (OUT / "assets.json").write_text(json.dumps(out_assets, indent=2) + "\n")
+    tmp["assets.json"].write_text(json.dumps(out_assets, indent=2) + "\n")
 
     missed = [
         (a["id"], a["firstDate"], a.get("fbTarget", a["target"]))
@@ -394,7 +410,9 @@ def main() -> None:
     report = sanity(
         df, assets, splices, outl, fxcheck, through, missed, candidate_gates(through)
     )
-    (OUT / "sanity.md").write_text(report)
+    tmp["sanity.md"].write_text(report)
+    for n, t in tmp.items():
+        os.replace(t, OUT / n)
     print(report)
     print(f"Wrote {OUT} — run the app with real data now")
     if missed:
@@ -404,6 +422,11 @@ def main() -> None:
         )
         for i, f, t in missed:
             print(f"    {i}: first date {f or 'no data'} > target {t}", file=sys.stderr)
+    print(
+        "RESULT "
+        + json.dumps({"lastMonth": df.index[-1], "previousLastMonth": prev_last})
+    )
+    if missed:
         sys.exit(1)
 
 

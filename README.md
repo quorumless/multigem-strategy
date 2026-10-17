@@ -31,7 +31,7 @@ cd data/pipeline && uv run python -m pipeline.build
 
 It writes `data/processed/monthly.csv`, `data/processed/assets.json` and `data/processed/sanity.md`.
 The first run is slow because msci.com requests are throttled; later runs use the cache in `data/raw/`.
-Refresh monthly by rerunning the command. Full details, sources and checks: [docs/DATA.md](docs/DATA.md)
+Refresh monthly with `pnpm data:refresh` (re-downloads all sources). Full details, sources and checks: [docs/DATA.md](docs/DATA.md)
 (see also [§Getting the data](docs/README.md#getting-the-data)).
 
 `data/sample/` is committed synthetic data in the same format, for tests, CI and demo mode. It is not real market data.
