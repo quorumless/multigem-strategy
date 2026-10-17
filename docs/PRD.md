@@ -67,6 +67,8 @@ Sources, proxies and UCITS mappings: DATA.md.
 
 ### F3 Strategy builder (web)
 - Edit sleeves/params via form; load presets; save to localStorage; import/export JSON.
+- Lookback is a 1–12 stepper with add/remove windows. Saved strategies appear as cards with delete and undo.
+  Modified presets save as "My <name>".
 - ✅ An exported JSON runs in the CLI and gives identical metrics to the web view.
 
 ### F4 Results view
@@ -116,9 +118,9 @@ Goal: someone with no finance background can use the app. Guiding question for e
 - **U3 Asset labels.** Human names plus an investable example from DATA.md's UCITS mapping
   (e.g. "US stocks (S&P 500), e.g. iShares Core S&P 500 UCITS"). Asset IDs appear only under Advanced and in JSON.
 - **U4 Builder.** Opens on preset cards, one-line story each. Simple mode (default) has 3 knobs: assets,
-  lookback months, safe haven. Advanced mode adds sleeves, buffer, invVol, executionLag and rebalance
+  lookback months (stepper), safe haven. Advanced mode adds sleeves, buffer, invVol, executionLag and rebalance
   frequency. Validation messages are human, e.g. "Sleeve weights must add up to 100% (now 90%)."
-- **U5 Realistic web defaults.** PLN, tax on at 19%, costs on. Show a "before vs after costs & taxes" line.
+- **U5 Realistic web defaults.** Reporting currency USD (default; PLN and EUR selectable), tax on at 19%, costs on. Show a "before vs after costs & taxes" line.
   These are the web form's defaults only; engine defaults in STRATEGY_SPEC §3 are unchanged.
 - **U6 Trade log in sentences**, e.g. "Mar 2008: switched US stocks → US bonds (both stock markets were
   below T-bills)." Built from `trades[].signals` (STRATEGY_SPEC §8).
