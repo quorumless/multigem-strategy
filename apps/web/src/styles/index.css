@@ -13,6 +13,14 @@
   }
   html {
     @apply overflow-x-hidden;
+    color-scheme: light;
+  }
+  /* native controls (select popups, date pickers, scrollbars) follow the app theme, not the OS */
+  html.dark {
+    color-scheme: dark;
+  }
+  option {
+    @apply bg-popover text-popover-foreground;
   }
   body {
     @apply min-h-svh w-full bg-background text-foreground has-[div[data-variant='inset']]:bg-sidebar;
